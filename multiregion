@@ -1,0 +1,61 @@
+ Benefits of Multi-Region EC2 Deployment
+ 
+1. High Availability and Fault Tolerance
+If one AWS region goes down, your application can remain available in another region.
+
+Example: Deploying EC2 instances in us-east-1 and us-west-2 ensures that an outage in the US East doesn’t take down your service completely.
+
+2. Disaster Recovery
+Multi-region setups help you implement DR strategies, such as:
+
+Active-passive: Primary in one region, standby in another.
+
+Active-active: Both regions handle traffic (with load balancing or DNS-based routing).
+
+3. Improved Latency
+Users in different geographic locations can be served by instances closer to them.
+
+Example: EC2 in us-east-1 for US East Coast users, and ap-southeast-1 for Southeast Asia.
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  required_version = ">= 1.0.0"
+}
+
+provider "aws" {
+  alias  = "us_east"
+  region = "us-east-1"
+}
+
+provider "aws" {
+  alias  = "us_west"
+  region = "us-west-2"
+}
+
+
+
+# EC2 in us-east-1
+resource "aws_instance" "east_instance" {
+  provider      = aws.us_east
+  ami           = "ami-12344"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "EastInstance"
+  }
+}
+
+# EC2 in us-west-2
+resource "aws_instance" "west_instance" {
+  provider      = aws.us_west
+  ami           = "ami-1234"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "WestInstance"
+  }
+}
